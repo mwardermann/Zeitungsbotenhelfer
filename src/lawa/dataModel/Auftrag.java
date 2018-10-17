@@ -1,5 +1,6 @@
 package lawa.dataModel;
 
+import java.beans.Transient;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 
@@ -19,7 +20,8 @@ public class Auftrag {
     private final String vorname;
     private final String name;
     private final String kommentar;
-    private Address address;
+
+    private transient Address address;
 
 
     public Auftrag(Integer auftragsnr, Integer menge, LocalDate gueltigAb, LocalDate gueltigBis, HashSet<DayOfWeek> wochentage, LocalDate unterbrechungVon, LocalDate unterbrechungBis, String druckerzeugnis, String vorname, String name, String kommentar) {

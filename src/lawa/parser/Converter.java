@@ -16,6 +16,35 @@ import java.util.stream.Collectors;
 public class Converter {
     private static Pattern hausnrPattern = Pattern.compile("(?<Nummer>[1-9][0-9]*)(\\s*-\\s*(?<Bis>[1-9][0-9]*))?(\\s*(?<Zusatz>[^0-9]+))?");
 
+    public static ArrayList<Bezirk> Convert(ArrayList<AddressInfo> addressInfos) {
+        Map<String, Map<String, Map<Address, List<Auftrag>>>> gruppen = addressInfos.stream().
+                collect(Collectors.groupingBy(
+                        AddressInfo::getBezirk,
+                        Collectors.groupingBy(a -> a.strasse,
+                                Collectors.groupingBy(Converter::toAddress,
+                                        Collectors.mapping(Converter::toAuftrag, Collectors.toList())))));
+
+        ArrayList<Bezirk> bezirke = new ArrayList<>();
+
+        gruppen.forEach((bezirkName, strassen) ->
+        {
+            Bezirk bezirk = new Bezirk(bezirkName);
+            bezirke.add(bezirk);
+
+            strassen.forEach((strasse, addressen) ->
+                    addressen.forEach((address, auftraege) -> {
+                        address.setBezirk(bezirk);
+                        bezirk.addAddress(address);
+                        auftraege.forEach((auftrag) -> {
+                            address.addAuftrag(auftrag);
+                            auftrag.setAddress(address);
+                        });
+                    }));
+        });
+
+        return bezirke;
+    }
+
     private static HashSet<DayOfWeek> convertPeriodToWeekdays(String periode) throws FormatException {
         HashSet<DayOfWeek> wochentage = new HashSet<>();
 
@@ -56,35 +85,6 @@ public class Converter {
         return wochentage;
     }
 
-    public static ArrayList<Bezirk> Convert(ArrayList<AddressInfo> addressInfos) {
-        Map<String, Map<String, Map<Address, List<Auftrag>>>> gruppen = addressInfos.stream().
-                collect(Collectors.groupingBy(
-                        AddressInfo::getBezirk,
-                        Collectors.groupingBy(a -> a.strasse,
-                                Collectors.groupingBy(Converter::toAddress,
-                                        Collectors.mapping(Converter::toAuftrag, Collectors.toList())))));
-
-        ArrayList<Bezirk> bezirke = new ArrayList<>();
-
-        gruppen.forEach((bezirkName, strassen) ->
-        {
-            Bezirk bezirk = new Bezirk(bezirkName);
-            bezirke.add(bezirk);
-
-            strassen.forEach((strasse, addressen) ->
-                    addressen.forEach((address, auftraege) -> {
-                        address.setBezirk(bezirk);
-                        bezirk.addAddress(address);
-                        auftraege.forEach((auftrag) -> {
-                            address.addAuftrag(auftrag);
-                            auftrag.setAddress(address);
-                        });
-                    }));
-        });
-
-        return bezirke;
-    }
-
     private static Address toAddress(AddressInfo addressInfo) {
         String strasse = addressInfo.strasse;
         Matcher matcher = hausnrPattern.matcher(addressInfo.hausnr);
@@ -109,7 +109,7 @@ public class Converter {
             zusatz = null;
         }
 
-        return new Address(strasse, hausnr, bis, zusatz);
+        return new Address(addressInfo.stadt, strasse, hausnr, bis, zusatz);
     }
 
     private static Auftrag toAuftrag(AddressInfo addressInfo) {

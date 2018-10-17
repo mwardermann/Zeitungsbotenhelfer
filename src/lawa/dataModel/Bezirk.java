@@ -14,4 +14,8 @@ public class Bezirk {
     public void addAddress(Address address) {
         this.addresses.add(address);
     }
+
+    public ArrayList<Address> getAddresses() {
+        return this.addresses;
+    }
 }
