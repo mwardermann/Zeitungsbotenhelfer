@@ -3,6 +3,7 @@ package lawa.dataModel;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 
+import java.util.HashSet;
 import java.util.List;
 
 public class Auftrag {
@@ -10,7 +11,7 @@ public class Auftrag {
     private final Integer menge;
     private final LocalDate gueltigAb;
     private final LocalDate gueltigBis;
-    private final List<DayOfWeek> wochentage;
+    private final HashSet<DayOfWeek> wochentage;
     private final LocalDate unterbrechungVon;
     private final LocalDate unterbrechungBis;
 
@@ -21,8 +22,7 @@ public class Auftrag {
     private Address address;
 
 
-    public Auftrag(Integer auftragsnr, Integer menge, LocalDate gueltigAb, LocalDate gueltigBis, List<DayOfWeek> wochentage, LocalDate unterbrechungVon, LocalDate unterbrechungBis, String druckerzeugnis, String vorname, String name, String kommentar) {
-
+    public Auftrag(Integer auftragsnr, Integer menge, LocalDate gueltigAb, LocalDate gueltigBis, HashSet<DayOfWeek> wochentage, LocalDate unterbrechungVon, LocalDate unterbrechungBis, String druckerzeugnis, String vorname, String name, String kommentar) {
         this.auftragsnr = auftragsnr;
         this.menge = menge;
         this.gueltigAb = gueltigAb;

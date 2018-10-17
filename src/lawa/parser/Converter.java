@@ -8,10 +8,7 @@ import lawa.dataModel.Bezirk;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -19,8 +16,8 @@ import java.util.stream.Collectors;
 public class Converter {
     private static Pattern hausnrPattern = Pattern.compile("(?<Nummer>[1-9][0-9]*)(\\s*-\\s*(?<Bis>[1-9][0-9]*))?(\\s*(?<Zusatz>[^0-9]+))?");
 
-    private static List<DayOfWeek> convertPeriodToWeekdays(String periode) throws FormatException {
-        ArrayList<DayOfWeek> wochentage = new ArrayList<>();
+    private static HashSet<DayOfWeek> convertPeriodToWeekdays(String periode) throws FormatException {
+        HashSet<DayOfWeek> wochentage = new HashSet<>();
 
         for (int pos = 0; pos < periode.length() - 1; pos += 2) {
             String wochentag = periode.substring(pos, pos + 2);
@@ -123,7 +120,7 @@ public class Converter {
 
         LocalDate gueltigAb = LocalDate.parse(addressInfo.teilaboVon == null ? addressInfo.gueltigAb : addressInfo.teilaboVon, formatter);
         LocalDate gueltigBis = LocalDate.parse(addressInfo.teilaboBis == null ? addressInfo.gueltigBis : addressInfo.teilaboBis, formatter);
-        List<DayOfWeek> wochentage = convertPeriodToWeekdays(addressInfo.periode);
+        HashSet<DayOfWeek> wochentage = convertPeriodToWeekdays(addressInfo.periode);
         LocalDate unterbrechungVon = addressInfo.unterbrechungVon == null ? null : LocalDate.parse(addressInfo.unterbrechungVon, formatter);
         LocalDate unterbrechungBis = addressInfo.unterbrechungBis == null ? null : LocalDate.parse(addressInfo.unterbrechungBis, formatter);
         String druckerzeugnis = addressInfo.druckerzeugnis;
