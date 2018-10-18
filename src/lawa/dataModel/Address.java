@@ -2,8 +2,9 @@ package lawa.dataModel;
 
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.List;
 
-public class Address implements Comparable<Address> {
+public class Address implements Diffable<Address>, Comparable<Address> {
     private final String stadt;
     private final String strasse;
     private final Integer hausnr;
@@ -21,17 +22,17 @@ public class Address implements Comparable<Address> {
         this.zusatz = zusatz;
     }
 
-    Address(){
-        this(null, null, 0, 0, null);
-    }
-
     public boolean hasLocation(){
         return latitude != null;
     }
 
     @Override
     public int compareTo(Address o) {
-        int result = strasse.compareTo(o.strasse);
+        int result = stadt.compareTo(o.stadt);
+
+        if (result == 0){
+            result = strasse.compareTo(o.strasse);
+        }
 
         if (result == 0)
         {
@@ -50,6 +51,16 @@ public class Address implements Comparable<Address> {
         return result;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        return obj.getClass() == this.getClass() && this.compareTo((Address)obj) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return this.stadt.hashCode() ^this.strasse.hashCode() * 31 ^ this.hausnr ^ this.bis ^ this.zusatz.hashCode();
+    }
+
     public void addAuftrag(Auftrag auftrag) {
         this.auftraege.add(auftrag);
     }
@@ -62,5 +73,20 @@ public class Address implements Comparable<Address> {
 
         this.latitude = latitude;
         this.length = length;
+    }
+
+    @Override
+    public String getId() {
+        return String.join("@", stadt, strasse, hausnr.toString(), bis.toString(), zusatz);
+    }
+
+    @Override
+    public List<String> getChangedFields(Diffable<?> other) {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public ArrayList<? extends Diffable<?>> getChildren() {
+        return this.auftraege;
     }
 }

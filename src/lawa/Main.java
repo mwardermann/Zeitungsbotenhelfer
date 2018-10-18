@@ -1,16 +1,16 @@
 package lawa;
 
 import com.google.gson.Gson;
-import lawa.dataModel.Address;
-import lawa.dataModel.Bezirk;
+import lawa.dataModel.*;
 import lawa.parser.AddressInfo;
 import lawa.parser.Converter;
 import lawa.parser.Parser;
 
 import java.io.*;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Main {
 
@@ -33,7 +33,7 @@ public class Main {
                 }
             }
 
-            ArrayList<Bezirk> bezirks = Converter.Convert(addressInfos);
+            ArrayList<Bezirk> bezirke = Converter.Convert(addressInfos);
 
             Gson gsonSerializer = new Gson();
             File bezirkeResult = new File(rootPath + "\\Bezirke.json");
@@ -43,27 +43,17 @@ public class Main {
             if (bezirkeResult.exists()){
                 try (BufferedReader reader = new BufferedReader(new FileReader(bezirkeResult)))
                 {
-                    oldBezirke = gsonSerializer.fromJson(reader, bezirks.getClass());
+                    oldBezirke = gsonSerializer.fromJson(reader, bezirke.getClass());
                 }
             }
-            else{
+            else {
                 oldBezirke = new ArrayList<>();
             }
 
-            for (Bezirk bezirk : bezirks) {
-                int bezirkIndex = oldBezirke.indexOf(bezirk);
+            List<DiffNode> diffNodes = Comparer.FindDiffs(bezirke, oldBezirke);
 
-                Bezirk oldBezirk = bezirkIndex >= 0 ? oldBezirke.get(bezirkIndex) : null;
 
-                for (Address address : bezirk.getAddresses()) {
-                    if (!address.hasLocation())
-                    {
-                        //getLocation(address);
-                    }
-                }
-            }
-
-            String serialized = gsonSerializer.toJson(bezirks);
+            String serialized = gsonSerializer.toJson(bezirke);
 
             try (BufferedWriter writer = new BufferedWriter(new FileWriter((bezirkeResult)))) {
                 writer.write(serialized);

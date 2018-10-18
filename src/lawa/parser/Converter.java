@@ -17,26 +17,21 @@ public class Converter {
     private static Pattern hausnrPattern = Pattern.compile("(?<Nummer>[1-9][0-9]*)(\\s*-\\s*(?<Bis>[1-9][0-9]*))?(\\s*(?<Zusatz>[^0-9]+))?");
 
     public static ArrayList<Bezirk> Convert(ArrayList<AddressInfo> addressInfos) {
-        Map<Bezirk, Map<String, Map<Address, List<Auftrag>>>> gruppen = addressInfos.stream().
+        Map<Bezirk, Map<Address, List<Auftrag>>> gruppen = addressInfos.stream().
                 collect(Collectors.groupingBy(
                         Converter::toBezirk,
-                        Collectors.groupingBy(a -> a.strasse,
-                                Collectors.groupingBy(Converter::toAddress,
-                                        Collectors.mapping(Converter::toAuftrag, Collectors.toList())))));
+                        Collectors.groupingBy(Converter::toAddress,
+                                Collectors.mapping(Converter::toAuftrag, Collectors.toList()))));
 
         ArrayList<Bezirk> bezirke = new ArrayList<>();
 
-        gruppen.forEach((bezirk, strassen) ->
+        gruppen.forEach((bezirk, adressen) ->
         {
             bezirke.add(bezirk);
-
-            strassen.forEach((strasse, addressen) ->
-                    addressen.forEach((address, auftraege) -> {
-                        bezirk.addAddress(address);
-                        auftraege.forEach((auftrag) -> {
-                            address.addAuftrag(auftrag);
-                        });
-                    }));
+            adressen.forEach((address, auftraege) -> {
+                bezirk.addAddress(address);
+                auftraege.forEach(address::addAuftrag);
+            });
         });
 
         return bezirke;
