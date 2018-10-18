@@ -35,37 +35,35 @@ public class Main {
 
             ArrayList<Bezirk> bezirks = Converter.Convert(addressInfos);
 
+            Gson gsonSerializer = new Gson();
+            File bezirkeResult = new File(rootPath + "\\Bezirke.json");
+
+            ArrayList<Bezirk> oldBezirke;
+
+            if (bezirkeResult.exists()){
+                try (BufferedReader reader = new BufferedReader(new FileReader(bezirkeResult)))
+                {
+                    oldBezirke = gsonSerializer.fromJson(reader, bezirks.getClass());
+                }
+            }
+            else{
+                oldBezirke = new ArrayList<>();
+            }
+
             for (Bezirk bezirk : bezirks) {
+                int bezirkIndex = oldBezirke.indexOf(bezirk);
+
+                Bezirk oldBezirk = bezirkIndex >= 0 ? oldBezirke.get(bezirkIndex) : null;
+
                 for (Address address : bezirk.getAddresses()) {
-                    String addresInUrl = address.getForPost("+");
-                    String urlString = "https://maps.googleapis.com/maps/api/geocode/json?address=" +
-                            addresInUrl +
-                            "&key=AIzaSyBzbDOe5-AB9iNQnH8IqlWYjS_LbpCP29s";
-
-                    try {
-                        URL url = new URL(urlString);
-                        try (InputStream is = url.openStream()) {
-                            Reader reader = new InputStreamReader(is);
-                            Map<String, Object> response = new Gson().fromJson(reader, Map.class);
-                            Map<String, Object> location =(Map<String, Object>)
-                                    ((Map<String, Object>)((Map<String, Object>)((ArrayList)response.get("results")).get(0)).get("geometry")).get("location");
-
-
-                            Double latitude = (Double) location.get("lat");
-                            Double length = (Double) location.get("lng");
-
-                            address.setLocation(latitude, length);
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    if (!address.hasLocation())
+                    {
+                        getLocation(address);
                     }
                 }
             }
 
-            Gson gsonSerializer = new Gson();
             String serialized = gsonSerializer.toJson(bezirks);
-
-            File bezirkeResult = new File(rootPath + "\\Bezirke.json");
 
             try (BufferedWriter writer = new BufferedWriter(new FileWriter((bezirkeResult)))) {
                 writer.write(serialized);
@@ -74,6 +72,31 @@ public class Main {
             printAddressInfos(rootPath, addressInfos);
         } catch (Exception ex) {
             ex.printStackTrace();
+        }
+    }
+
+    private static void getLocation(Address address) {
+        String addresInUrl = address.getForPost("+");
+        String urlString = "https://maps.googleapis.com/maps/api/geocode/json?address=" +
+                addresInUrl +
+                "&key=AIzaSyBzbDOe5-AB9iNQnH8IqlWYjS_LbpCP29s";
+
+        try {
+            URL url = new URL(urlString);
+            try (InputStream is = url.openStream()) {
+                Reader reader = new InputStreamReader(is);
+                Map<String, Object> response = new Gson().fromJson(reader, Map.class);
+                Map<String, Object> location =(Map<String, Object>)
+                        ((Map<String, Object>)((Map<String, Object>)((ArrayList)response.get("results")).get(0)).get("geometry")).get("location");
+
+
+                Double latitude = (Double) location.get("lat");
+                Double length = (Double) location.get("lng");
+
+                address.setLocation(latitude, length);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

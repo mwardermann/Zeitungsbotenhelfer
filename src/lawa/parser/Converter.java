@@ -17,18 +17,17 @@ public class Converter {
     private static Pattern hausnrPattern = Pattern.compile("(?<Nummer>[1-9][0-9]*)(\\s*-\\s*(?<Bis>[1-9][0-9]*))?(\\s*(?<Zusatz>[^0-9]+))?");
 
     public static ArrayList<Bezirk> Convert(ArrayList<AddressInfo> addressInfos) {
-        Map<String, Map<String, Map<Address, List<Auftrag>>>> gruppen = addressInfos.stream().
+        Map<Bezirk, Map<String, Map<Address, List<Auftrag>>>> gruppen = addressInfos.stream().
                 collect(Collectors.groupingBy(
-                        AddressInfo::getBezirk,
+                        Converter::toBezirk,
                         Collectors.groupingBy(a -> a.strasse,
                                 Collectors.groupingBy(Converter::toAddress,
                                         Collectors.mapping(Converter::toAuftrag, Collectors.toList())))));
 
         ArrayList<Bezirk> bezirke = new ArrayList<>();
 
-        gruppen.forEach((bezirkName, strassen) ->
+        gruppen.forEach((bezirk, strassen) ->
         {
-            Bezirk bezirk = new Bezirk(bezirkName);
             bezirke.add(bezirk);
 
             strassen.forEach((strasse, addressen) ->
@@ -43,6 +42,12 @@ public class Converter {
         });
 
         return bezirke;
+    }
+
+    private static Bezirk toBezirk(AddressInfo addressInfo) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+
+        return new Bezirk(addressInfo.getBezirk(), LocalDate.parse(addressInfo.getSelektionsDatum(), formatter), addressInfo.getSumme());
     }
 
     private static HashSet<DayOfWeek> convertPeriodToWeekdays(String periode) throws FormatException {

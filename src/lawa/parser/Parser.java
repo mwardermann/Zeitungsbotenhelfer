@@ -4,46 +4,56 @@ import lawa.MyLogger;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.PDFTextStripperByArea;
 
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class Parser {
     public static ArrayList<AddressInfo> Parse(MyLogger logger,  String[] druckerzeugnisse, File file) throws IOException {
         ArrayList<AddressInfo> addressInfos = new ArrayList<>();
+        ArrayList<Header> headers = new ArrayList<>();
 
         try (PDDocument document = PDDocument.load(file)) {
             logger.setFile(file);
-            for (int pageNumber = 0; pageNumber < document.getNumberOfPages(); pageNumber++) {
-                logger.setPageNumber(pageNumber);
-                String text = extractTextFromPage(document.getPage(pageNumber));
+                String text = extractTextFromPage(document);
 
                 Automaton automaton = new Automaton(druckerzeugnisse);
 
                 parseText(automaton, text, logger);
 
+                headers.addAll(automaton.getHeaders());
                 addressInfos.addAll(automaton.getAddressInfos());
+        }
+
+        Map<String, List<Header>> hs = headers.stream().filter(h -> h.bezirk != null).collect(Collectors.groupingBy(h -> h.bezirk));
+        for (Map.Entry<String, List<Header>> e : hs.entrySet())
+        {
+            Optional<Header> mainHeader = e.getValue().stream().filter(h -> h.summe != null).findFirst();
+
+            if (mainHeader.isPresent()){
+                for (Header header: e.getValue())
+                {
+                    header.summe = mainHeader.get().summe;
+                }
             }
         }
 
         return addressInfos;
     }
 
-    private static String extractTextFromPage(PDPage page) throws IOException {
-        PDFTextStripperByArea stripper = new PDFTextStripperByArea();
+    private static String extractTextFromPage(PDDocument page) throws IOException {
+        PDFTextStripper stripper = new PDFTextStripper();
         stripper.setSortByPosition(true);
-
-        PDRectangle origRect = page.getBBox();
-        Rectangle rect = new Rectangle((int) origRect.getLowerLeftX(), (int) origRect.getLowerLeftY(), (int) origRect.getWidth(), (int) origRect.getHeight());
-        stripper.addRegion("class1", rect);
-
-        stripper.extractRegions(page);
-
-        return stripper.getTextForRegion("class1");
+        return stripper.getText(page);
     }
 
     private static void parseText(Automaton automaton, String text, MyLogger logger) {

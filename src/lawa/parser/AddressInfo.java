@@ -32,6 +32,11 @@ public class AddressInfo {
         return this.header.bezirk;
     }
 
+    String getSelektionsDatum()
+    {
+        return this.header.selektionsdatum;
+    }
+
     public static String getHeader(){
         Header header = new Header();
         header.bezirk = "Bezirk";
@@ -62,5 +67,9 @@ public class AddressInfo {
     @Override
     public String toString() {
         return String.join("\t", this.header.bezirk, this.header.selektionsdatum, this.header.seite, auftragsnr, name, strasse, hausnr, stadt, druckerzeugnis, gueltigAb, gueltigBis, unterbrechungVon, unterbrechungBis, periode, menge, auftragsmenge, art, pa, pva, kommentar);
+    }
+
+    public Integer getSumme() {
+        return header.summe;
     }
 }

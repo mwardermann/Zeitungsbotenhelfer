@@ -9,7 +9,6 @@ public class Address implements Comparable<Address> {
     private final Integer hausnr;
     private final Integer bis;
     private final String zusatz;
-
     private transient Bezirk bezirk;
     private ArrayList<Auftrag> auftraege = new ArrayList<>();
     private Double latitude;
@@ -25,6 +24,10 @@ public class Address implements Comparable<Address> {
 
     Address(){
         this(null, null, 0, 0, null);
+    }
+
+    public boolean hasLocation(){
+        return latitude != null;
     }
 
     @Override
