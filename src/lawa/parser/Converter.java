@@ -32,11 +32,9 @@ public class Converter {
 
             strassen.forEach((strasse, addressen) ->
                     addressen.forEach((address, auftraege) -> {
-                        address.setBezirk(bezirk);
                         bezirk.addAddress(address);
                         auftraege.forEach((auftrag) -> {
                             address.addAuftrag(auftrag);
-                            auftrag.setAddress(address);
                         });
                     }));
         });

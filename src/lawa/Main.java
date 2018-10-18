@@ -58,7 +58,7 @@ public class Main {
                 for (Address address : bezirk.getAddresses()) {
                     if (!address.hasLocation())
                     {
-                        getLocation(address);
+                        //getLocation(address);
                     }
                 }
             }

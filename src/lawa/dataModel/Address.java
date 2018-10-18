@@ -9,7 +9,6 @@ public class Address implements Comparable<Address> {
     private final Integer hausnr;
     private final Integer bis;
     private final String zusatz;
-    private transient Bezirk bezirk;
     private ArrayList<Auftrag> auftraege = new ArrayList<>();
     private Double latitude;
     private Double length;
@@ -49,11 +48,6 @@ public class Address implements Comparable<Address> {
         }
 
         return result;
-    }
-
-    public void setBezirk(Bezirk bezirk) {
-
-        this.bezirk = bezirk;
     }
 
     public void addAuftrag(Auftrag auftrag) {
