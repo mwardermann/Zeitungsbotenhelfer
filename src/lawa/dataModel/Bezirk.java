@@ -60,7 +60,7 @@ public class Bezirk implements Diffable<Bezirk>, Comparable<Bezirk> {
 
         ArrayList<String> result = new ArrayList<>();
 
-        if (!this.summe.equals(other.summe)) {
+        if ((this.summe == null) != (other.summe == null) || (this.summe != null && !this.summe.equals(other.summe))) {
             result.add("summe");
         }
 

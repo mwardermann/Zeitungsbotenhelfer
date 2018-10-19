@@ -1,13 +1,10 @@
 package lawa.parser;
 
+import lawa.Logger;
 import lawa.MyLogger;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.apache.pdfbox.text.PDFTextStripperByArea;
 
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,7 +17,7 @@ import java.util.stream.Collectors;
 public class Parser {
     public static ArrayList<AddressInfo> Parse(MyLogger logger,  String[] druckerzeugnisse, File file) throws IOException {
         ArrayList<AddressInfo> addressInfos = new ArrayList<>();
-        ArrayList<Header> headers = new ArrayList<>();
+        ArrayList<Header> headers;
 
         try (PDDocument document = PDDocument.load(file)) {
             logger.setFile(file);
@@ -30,8 +27,8 @@ public class Parser {
 
                 parseText(automaton, text, logger);
 
-                headers.addAll(automaton.getHeaders());
-                addressInfos.addAll(automaton.getAddressInfos());
+                headers = automaton.getHeaders();
+                addressInfos = automaton.getAddressInfos();
         }
 
         Map<String, List<Header>> hs = headers.stream().filter(h -> h.bezirk != null).collect(Collectors.groupingBy(h -> h.bezirk));
@@ -50,13 +47,7 @@ public class Parser {
         return addressInfos;
     }
 
-    private static String extractTextFromPage(PDDocument page) throws IOException {
-        PDFTextStripper stripper = new PDFTextStripper();
-        stripper.setSortByPosition(true);
-        return stripper.getText(page);
-    }
-
-    private static void parseText(Automaton automaton, String text, MyLogger logger) {
+    static void parseText(Automaton automaton, String text, Logger logger) {
         Pattern newlinePattern = Pattern.compile("\\r\\n");
 
         newlinePattern.splitAsStream(text).
@@ -72,6 +63,12 @@ public class Parser {
 
                     logger.log((String.format("Konnte Zeile '%s' nicht auswerten. Status: \r\n%s", line, automaton.toString())));
                 });
+    }
+
+    private static String extractTextFromPage(PDDocument page) throws IOException {
+        PDFTextStripper stripper = new PDFTextStripper();
+        stripper.setSortByPosition(true);
+        return stripper.getText(page);
     }
 
 }

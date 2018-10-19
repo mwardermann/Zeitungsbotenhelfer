@@ -58,7 +58,9 @@ public class Address implements Diffable<Address>, Comparable<Address> {
 
     @Override
     public int hashCode() {
-        return this.stadt.hashCode() ^this.strasse.hashCode() * 31 ^ this.hausnr ^ this.bis ^ this.zusatz.hashCode();
+        return (stadt == null ? 0 :stadt.hashCode()) ^
+                (strasse == null ? 0:strasse.hashCode() * 31) ^
+                (hausnr == null ? 0: hausnr) ^ (bis == null ? 0: bis) * 113 ^ (zusatz == null ? 0 : zusatz.hashCode());
     }
 
     public void addAuftrag(Auftrag auftrag) {
@@ -77,7 +79,7 @@ public class Address implements Diffable<Address>, Comparable<Address> {
 
     @Override
     public String getId() {
-        return String.join("@", stadt, strasse, hausnr.toString(), bis.toString(), zusatz);
+        return String.join("@", stadt, strasse, hausnr == null ? "" : hausnr.toString(), bis == null ? "" : bis.toString(), zusatz);
     }
 
     @Override

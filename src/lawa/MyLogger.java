@@ -5,7 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class MyLogger {
+public class MyLogger implements Logger {
     private final File logFile;
     private String fileName;
     private int pageNumber;
@@ -33,6 +33,7 @@ public class MyLogger {
         }
     }
 
+    @Override
     public void log(String msg) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter((logFile),true))) {
             if (hasBeenChanged) {

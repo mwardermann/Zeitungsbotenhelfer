@@ -97,7 +97,7 @@ class Automaton {
                 "(?<Auftragsnr>[0-9]+)",
                 "(?<Art>\\S+)",
                 "(?<PA>\\S+)",
-                "(?<Druckerzeugnis>(" + String.join("|", druckerzeugnisse) + "))",
+                "(?<Druckerzeugnis>(.*))",
                 "(?<PVA>\\S+)",
                 "(?<GueltigAb>" + datePart + ")",
                 "(?<GueltigBis>" + datePart + ")",

@@ -1,12 +1,14 @@
 package lawa;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import lawa.dataModel.*;
 import lawa.parser.AddressInfo;
 import lawa.parser.Converter;
 import lawa.parser.Parser;
 
 import java.io.*;
+import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -43,7 +45,9 @@ public class Main {
             if (bezirkeResult.exists()){
                 try (BufferedReader reader = new BufferedReader(new FileReader(bezirkeResult)))
                 {
-                    oldBezirke = gsonSerializer.fromJson(reader, bezirke.getClass());
+                    Type bezirkType = TypeToken.getParameterized(List.class, Bezirk.class).getType();
+
+                    oldBezirke = gsonSerializer.fromJson(reader, bezirkType);
                 }
             }
             else {
@@ -51,7 +55,6 @@ public class Main {
             }
 
             List<DiffNode> diffNodes = Comparer.FindDiffs(bezirke, oldBezirke);
-
 
             String serialized = gsonSerializer.toJson(bezirke);
 
