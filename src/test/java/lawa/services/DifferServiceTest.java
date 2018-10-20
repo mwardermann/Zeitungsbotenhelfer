@@ -1,8 +1,11 @@
 package lawa.services;
 
+import lawa.dataModel.Address;
 import lawa.dataModel.Bezirk;
 import lawa.dataModel.Comparer;
 import lawa.dataModel.DiffNode;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.junit.Test;
 
 import java.time.LocalDate;
@@ -14,6 +17,8 @@ import static lawa.dataModel.ChangeType.Deleted;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class DifferServiceTest {
+
+    private DifferService differService = new DifferService();
 
     @Test
     public void it_should_return_diffeNode_for_one_change_added_and_deleted() {
@@ -37,6 +42,24 @@ public class DifferServiceTest {
         assertThat(diffNodes.size()).isEqualTo(2);
         assertThat(diffNodes.get(0).getChangeType()).isEqualTo(Added);
         assertThat(diffNodes.get(1).getChangeType()).isEqualTo(Deleted);
+    }
+
+    @Test
+    public void should_return_new_word_document() {
+        assertThat(differService.createWordDocument()).isNotNull();
+    }
+
+    @Test
+    public void should_create_row_of_address() {
+        XWPFDocument wordDocument = new XWPFDocument();
+
+        Address inputAddress = new Address("Petershagen", "Goebenstrasse", 12, 1, "");
+        String outputAddress = "Address{stadt='Petershagen', strasse='Goebenstrasse', hausnr=12, bis=1, zusatz='', auftraege=[], latitude=null, length=null}";
+
+        XWPFRun paragraph = differService.getAddressParagraphFromAddress(inputAddress, wordDocument);
+
+        assertThat(paragraph).isNotNull();
+        assertThat(paragraph.getText(0)).isEqualTo(outputAddress);
     }
 
 }

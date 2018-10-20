@@ -91,4 +91,18 @@ public class Address implements Diffable<Address>, Comparable<Address> {
     public ArrayList<? extends Diffable<?>> getChildren() {
         return this.auftraege;
     }
+
+    @Override
+    public String toString() {
+        return "Address{" +
+                "stadt='" + stadt + '\'' +
+                ", strasse='" + strasse + '\'' +
+                ", hausnr=" + hausnr +
+                ", bis=" + bis +
+                ", zusatz='" + zusatz + '\'' +
+                ", auftraege=" + auftraege +
+                ", latitude=" + latitude +
+                ", length=" + length +
+                '}';
+    }
 }
