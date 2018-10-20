@@ -1,6 +1,7 @@
 .idea/
 *.log
 *.lck
+*.iml
 target/
 *.xls
 *.xlsx
