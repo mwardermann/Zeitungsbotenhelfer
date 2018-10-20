@@ -5,6 +5,10 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 public class DifferService {
     public XWPFDocument createWordDocument() {
         XWPFDocument wordDocument = new XWPFDocument();
@@ -21,4 +25,11 @@ public class DifferService {
         return addressParagraph;
     }
 
+    void writeAddressToDocument(File file, Address address) throws IOException {
+        try(FileOutputStream out = new FileOutputStream(file)) {
+            XWPFDocument wordDocument = createWordDocument();
+            getAddressParagraphFromAddress(address, wordDocument);
+            wordDocument.write(out);
+        }
+    }
 }

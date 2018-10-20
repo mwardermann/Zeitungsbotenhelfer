@@ -1,5 +1,6 @@
 package lawa;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lawa.dataModel.Address;
@@ -9,6 +10,7 @@ import lawa.dataModel.DiffNode;
 import lawa.parser.AddressInfo;
 import lawa.parser.Converter;
 import lawa.parser.Parser;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.lang.reflect.Type;
@@ -30,13 +32,7 @@ public class Main {
 
             String[] druckerzeugnisse = new String[]{"MT", "DIE ZEIT", "HB", "FAZ", "TAZ"};
 
-            ArrayList<AddressInfo> addressInfos = new ArrayList<>();
-
-            for (File file : new File(rootPath).listFiles()) {
-                if (file.getName().endsWith(".pdf")) {
-                    addressInfos.addAll(Parser.Parse(logger, druckerzeugnisse, file));
-                }
-            }
+            ArrayList<AddressInfo> addressInfos = getAllAdresses(rootPath, logger, druckerzeugnisse);
 
             ArrayList<Bezirk> bezirke = Converter.Convert(addressInfos);
 
@@ -44,20 +40,20 @@ public class Main {
             File bezirkeResult = new File(rootPath + "\\Bezirke.json");
 
             ArrayList<Bezirk> oldBezirke;
-
-            if (bezirkeResult.exists()){
-                try (BufferedReader reader = new BufferedReader(new FileReader(bezirkeResult)))
-                {
+            if (bezirkeResult.exists()) {
+                try (BufferedReader reader = new BufferedReader(new FileReader(bezirkeResult))) {
                     Type bezirkType = TypeToken.getParameterized(List.class, Bezirk.class).getType();
 
                     oldBezirke = gsonSerializer.fromJson(reader, bezirkType);
                 }
-            }
-            else {
+            } else {
                 oldBezirke = new ArrayList<>();
             }
 
             List<DiffNode> diffNodes = Comparer.FindDiffs(bezirke, oldBezirke);
+
+            ObjectMapper mapper = new ObjectMapper();
+            String jsonInString = mapper.writeValueAsString(diffNodes);
 
             String serialized = gsonSerializer.toJson(bezirke);
 
@@ -71,6 +67,19 @@ public class Main {
         }
     }
 
+
+    @NotNull
+    private static ArrayList<AddressInfo> getAllAdresses(String rootPath, MyLogger logger, String[] druckerzeugnisse) throws IOException {
+        ArrayList<AddressInfo> addressInfos = new ArrayList<>();
+
+        for (File file : new File(rootPath).listFiles()) {
+            if (file.getName().endsWith(".pdf")) {
+                addressInfos.addAll(Parser.Parse(logger, druckerzeugnisse, file));
+            }
+        }
+        return addressInfos;
+    }
+
     private static void getLocation(Address address) {
         String addresInUrl = address.getForPost("+");
         String urlString = "https://maps.googleapis.com/maps/api/geocode/json?address=" +
@@ -82,8 +91,8 @@ public class Main {
             try (InputStream is = url.openStream()) {
                 Reader reader = new InputStreamReader(is);
                 Map<String, Object> response = new Gson().fromJson(reader, Map.class);
-                Map<String, Object> location =(Map<String, Object>)
-                        ((Map<String, Object>)((Map<String, Object>)((ArrayList)response.get("results")).get(0)).get("geometry")).get("location");
+                Map<String, Object> location = (Map<String, Object>)
+                        ((Map<String, Object>) ((Map<String, Object>) ((ArrayList) response.get("results")).get(0)).get("geometry")).get("location");
 
 
                 Double latitude = (Double) location.get("lat");

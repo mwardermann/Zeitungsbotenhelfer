@@ -6,8 +6,14 @@ import lawa.dataModel.Comparer;
 import lawa.dataModel.DiffNode;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +24,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class DifferServiceTest {
 
+    public static final String TEST_DOCX = "test.docx";
     private DifferService differService = new DifferService();
+    private File testFile;
+
+    @Before
+    public void setUp() {
+        testFile = new File(TEST_DOCX);
+    }
 
     @Test
     public void it_should_return_diffeNode_for_one_change_added_and_deleted() {
@@ -62,4 +75,17 @@ public class DifferServiceTest {
         assertThat(paragraph.getText(0)).isEqualTo(outputAddress);
     }
 
+    @Test
+    public void should_write_address_to_document() throws IOException {
+        Address inputAddress = new Address("Petershagen", "Goebenstrasse", 12, 1, "");
+
+        differService.writeAddressToDocument(testFile, inputAddress);
+
+        assertThat(testFile.exists()).isTrue();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        Files.deleteIfExists(Paths.get(TEST_DOCX));
+    }
 }
