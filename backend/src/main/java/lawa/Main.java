@@ -1,6 +1,5 @@
 package lawa;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lawa.dataModel.Address;
@@ -39,21 +38,9 @@ public class Main {
             Gson gsonSerializer = new Gson();
             File bezirkeResult = new File(rootPath + "\\Bezirke.json");
 
-            ArrayList<Bezirk> oldBezirke;
-            if (bezirkeResult.exists()) {
-                try (BufferedReader reader = new BufferedReader(new FileReader(bezirkeResult))) {
-                    Type bezirkType = TypeToken.getParameterized(List.class, Bezirk.class).getType();
-
-                    oldBezirke = gsonSerializer.fromJson(reader, bezirkType);
-                }
-            } else {
-                oldBezirke = new ArrayList<>();
-            }
+            ArrayList<Bezirk> oldBezirke = getOldBezirke(gsonSerializer, bezirkeResult);
 
             List<DiffNode> diffNodes = Comparer.FindDiffs(bezirke, oldBezirke);
-
-            ObjectMapper mapper = new ObjectMapper();
-            String jsonInString = mapper.writeValueAsString(diffNodes);
 
             String serialized = gsonSerializer.toJson(bezirke);
 
@@ -65,6 +52,20 @@ public class Main {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    private static ArrayList<Bezirk> getOldBezirke(Gson gsonSerializer, File bezirkeResult) throws IOException {
+        ArrayList<Bezirk> oldBezirke;
+        if (bezirkeResult.exists()) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(bezirkeResult))) {
+                Type bezirkType = TypeToken.getParameterized(List.class, Bezirk.class).getType();
+
+                oldBezirke = gsonSerializer.fromJson(reader, bezirkType);
+            }
+        } else {
+            oldBezirke = new ArrayList<>();
+        }
+        return oldBezirke;
     }
 
 

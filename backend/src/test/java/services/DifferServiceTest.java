@@ -1,11 +1,13 @@
-package lawa.services;
+package services;
 
 import lawa.dataModel.Address;
 import lawa.dataModel.Bezirk;
 import lawa.dataModel.Comparer;
 import lawa.dataModel.DiffNode;
+import lawa.services.DifferService;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -82,6 +84,33 @@ public class DifferServiceTest {
         differService.writeAddressToDocument(testFile, inputAddress);
 
         assertThat(testFile.exists()).isTrue();
+    }
+
+    @Test
+    public void should_return_list_of_addresses_matched_by_street() {
+        Address inputAddress_1 = new Address("Petershagen", "Goebenstrasse", 12, 1, "");
+        Address inputAddress_2 = new Address("Petershagen", "Goebenstrasse", 14, 1, "");
+        Address inputAddress_3 = new Address("Petershagen", "Hauptstrasse", 12, 1, "");
+        Address inputAddress_4 = new Address("Petershagen", "Goebenstrasse", 12, 4, "");
+
+        Bezirk bezirk_old = new Bezirk("Test_1", LocalDate.of(2018, 10, 21), 4);
+        bezirk_old.addAddress(inputAddress_1);
+        bezirk_old.addAddress(inputAddress_2);
+        bezirk_old.addAddress(inputAddress_3);
+
+        Bezirk bezirk_new = new Bezirk("Test_1", LocalDate.of(2018, 10, 21), 4);
+        bezirk_new.addAddress(inputAddress_2);
+        bezirk_new.addAddress(inputAddress_3);
+        bezirk_new.addAddress(inputAddress_4);
+        //differService.matchAddressesByStreet();
+
+        ArrayList<Bezirk> old_bezirke = new ArrayList<>();
+        old_bezirke.add(bezirk_old);
+        ArrayList<Bezirk> new_bezirke = new ArrayList<>();
+        old_bezirke.add(bezirk_new);
+
+        List<DiffNode> diffNodes = Comparer.FindDiffs(new_bezirke, old_bezirke);
+        Assertions.assertThat(diffNodes).isNotNull();
     }
 
     @After
